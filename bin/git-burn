@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROGRAM_NAME="${0##*/}"
+SHARE_DIR="$(cd "$(dirname "$0")/../share/git-burn" && pwd)"
+[ -d "$SHARE_DIR" ] || echo "$SHARE_DIR: not found" | error
+
+: "${GITLAB_URL:="$(snapctl get gitlab.url 2>/dev/null)"}"
+: "${GITLAB_TOKEN:="$(snapctl get gitlab.token 2>/dev/null)"}"
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+usage() {
+    cat <<EOF
+Git Burn is a server-side hook for linting commits.
+
+Usage:
+  $PROGRAM_NAME REF OLD NEW
+  $PROGRAM_NAME -s|--stdin
+  $PROGRAM_NAME -h|--help
+
+Options:
+  -s, --stdin  Lint message from standard input.
+
+Environment:
+  GITLAB_URL
+  GITLAB_TOKEN
+EOF
+}
+
+main() {
+    eval set -- "$(\
+        getopt \
+               --name "$PROGRAM_NAME" \
+               --longoptions help,stdin \
+               --options h,s \
+               -- \
+               "$@"
+    )"
+
+    while true; do
+        case "$1" in
+            -h|--help)
+                usage
+                exit
+                ;;
+            -s|--stdin)
+                cat | lint-message
+                exit
+                ;;
+            "--")
+                shift
+                break
+                ;;
+        esac
+        shift
+    done
+
+    if [ $# -ne 3 ]; then
+        usage | error
+    fi
+
+    hook "$@"
+}
+
+hook() {
+    local old_rev="$2"
+    local new_rev="$3"
+    local revs="$old_rev..$new_rev"
+    [[ "$old_rev" =~ ^0+$ ]] && revs="$new_rev"
+
+    fetch-mails
+
+    local status=0
+    for commit in $(git rev-list "$revs" --not --branches --tags); do
+        is-wiki "$commit" && continue
+
+        result="$(lint "$commit" 2>&1 || true)"
+        [ -z "$result" ] && continue
+
+        if [ "$status" -eq 0 ]; then
+            echo "Git Burn rejected your commits."; echo
+        fi
+
+        git log -1 "$commit"; echo
+        echo "$result"; echo
+        status=1
+    done
+    exit "$status"
+}
+
+lint() {
+    lint-mails "$1"
+    lint-commit "$1"
+}
+
+lint-mails() {
+    [ -z "$EMAILS" ] && return 0
+    for who in a c; do
+        [ -z "$(join <(git show --format="%${who}E" -s "$1") \
+                     <(echo "$EMAILS"))" ] \
+            && cat <<-EOF && return 1
+Seems like you're messed up with commit email.
+
+Allowed emails:
+$EMAILS
+EOF
+    done
+}
+
+lint-commit() {
+    lint-message --ignore-stdin --commits "$1^...$1"
+}
+
+lint-message() {
+    gitlint -vv "$@" \
+            --config "$SHARE_DIR/gitlint.ini" \
+            --extra-path "$SHARE_DIR/gitlint-rules.py"
+}
+
+is-wiki() {
+    git-subject "$@" | grep -q "page:"
+}
+
+git-subject() {
+    git show --no-patch --format="%s" "$@"
+}
+
+fetch-mails() {
+    fetch-mails-from-gitlab
+}
+
+fetch-mails-from-gitlab() {
+    [ -z "$GITLAB_URL" ] || [ -z "$GITLAB_TOKEN" ] && return 0
+    EMAILS=$(curl --silent --show-error \
+                  --header "Private-Token: $GITLAB_TOKEN" \
+                  "$GITLAB_URL/api/v4/users/?active=true&per_page=1000" \
+             | jq -r '.[].email' \
+             | sort)
+}
+
+error() {
+    cat >&2
+    exit 1
+}
+
+main "$@"

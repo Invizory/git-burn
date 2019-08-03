@@ -1,0 +1,39 @@
+name: git-burn
+title: Git Burn
+summary: Server-side hook for linting commits.
+description: |
+  Git Burn is a server-side hook for linting commits.
+license: MIT
+
+version: git
+base: core
+grade: stable
+confinement: strict
+
+apps:
+  git-burn:
+    command: git-burn
+    plugs:
+      - home
+      - removable-media
+
+parts:
+  dependencies:
+    plugin: python
+    python-packages:
+      - gitlint
+    stage-packages:
+      - bash
+      - jq
+      - curl
+      - git
+  git-burn-bin:
+    plugin: dump
+    source: bin
+    organize:
+      git-burn: usr/bin/
+  git-burn-share:
+    plugin: dump
+    source: share/git-burn
+    organize:
+      gitlint*: usr/share/git-burn/

@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+
+GITLAB_URL="$(snapctl get gitlab.url)"
+GITLAB_TOKEN="$(snapctl get gitlab.token)"
+
+configure() {
+    configure_gitlab
+}
+
+configure_gitlab() {
+    [ -z "$GITLAB_URL" ] && return 0
+    if ! expr "$GITLAB_URL" : '^https*://' > /dev/null; then
+        echo "gitlab.url=\"$GITLAB_URL\" is not a valid URL" | error
+    fi
+    if [ -z "$GITLAB_TOKEN" ]; then
+        echo "gitlab.token should be set if gitlab.url is set" | error
+    fi
+}
+
+error() {
+    cat >&2
+    exit 1
+}
+
+configure
