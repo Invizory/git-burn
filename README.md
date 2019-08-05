@@ -1,6 +1,7 @@
 # Git Burn
 
 [![Build status][travis-image]][travis-url]
+[![Snap version][snap-image]][snap-url]
 [![License][license-image]][license]
 
 **Git Burn** is a server-side hook for linting commits.
@@ -24,7 +25,7 @@
 
     snap install git-burn
 
-You should have [snapd] installed.
+Note that you should have [snapd] installed.
 
 ### Set up hook with [GitLab]
 
@@ -68,4 +69,6 @@ Copyright © 2018–2019 [Arthur Khashaev]. See [license] for details.
 
 [travis-image]: https://travis-ci.com/Invizory/git-burn.svg
 [travis-url]: https://travis-ci.com/Invizory/git-burn
+[snap-image]: https://snapcraft.io/git-burn/badge.svg
+[snap-url]: https://snapcraft.io/git-burn
 [license-image]: https://img.shields.io/badge/license-MIT-green.svg
