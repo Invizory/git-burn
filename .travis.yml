@@ -1,0 +1,27 @@
+language: bash
+dist: bionic
+
+script:
+  - make lint
+  - make build
+
+deploy:
+  - provider: snap
+    skip_cleanup: true
+    snap: "*.snap"
+    channel: stable
+    on:
+      tags: true
+  - provider: snap
+    skip_cleanup: true
+    snap: "*.snap"
+    channel: edge
+    on:
+      branch: master
+  - provider: snap
+    skip_cleanup: true
+    snap: "*.snap"
+    channel: edge/$TRAVIS_BRANCH
+    on:
+      all_branches: true
+      condition: $TRAVIS_BRANCH != master

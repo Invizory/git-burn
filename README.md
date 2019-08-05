@@ -1,5 +1,6 @@
 # Git Burn
 
+[![Build status][travis-image]][travis-url]
 [![License][license-image]][license]
 
 **Git Burn** is a server-side hook for linting commits.
@@ -65,4 +66,6 @@ Copyright © 2018–2019 [Arthur Khashaev]. See [license] for details.
 [GitLab]: https://about.gitlab.com/
 [GitLab documentation on server-side hooks]: https://docs.gitlab.com/ee/administration/custom_hooks.html
 
+[travis-image]: https://travis-ci.com/Invizory/git-burn.svg
+[travis-url]: https://travis-ci.com/Invizory/git-burn
 [license-image]: https://img.shields.io/badge/license-MIT-green.svg
