@@ -16,6 +16,7 @@ apps:
     plugs:
       - home
       - removable-media
+      - network
 
 parts:
   dependencies:
