@@ -8,15 +8,11 @@ license: MIT
 version: git
 base: core
 grade: stable
-confinement: strict
+confinement: classic
 
 apps:
   git-burn:
     command: git-burn
-    plugs:
-      - home
-      - removable-media
-      - network
 
 parts:
   dependencies:

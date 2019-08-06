@@ -23,7 +23,7 @@
 
 ## Install
 
-    snap install git-burn
+    snap install git-burn --classic
 
 Note that you should have [snapd] installed.
 
@@ -31,13 +31,7 @@ Note that you should have [snapd] installed.
 
 To set a global hook for all repositories:
 
-    mkdir /home/gitlab
-    mount --bind /var/opt/gitlab /home/gitlab
-    echo /var/opt/gitlab /home/gitlab none defaults,bind 0 0 >> /etc/fstab
-    install -dm 0755 -o git -g git /home/gitlab/snap
-    service gitlab-runsvdir stop
-    usermod -d /home/gitlab git
-    service gitlab-runsvdir start
+    install -dm 0755 -o git -g git /var/opt/gitlab/snap
     ln -fs "$(which git-burn)" /opt/gitlab/embedded/service/gitlab-shell/hooks/update.d
 
 Please refer to [GitLab documentation on server-side hooks] for details.
