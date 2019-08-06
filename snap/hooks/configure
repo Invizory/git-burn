@@ -1,11 +1,19 @@
 #!/bin/sh
 set -e
 
+DEBUG="$(snapctl get debug)"
 GITLAB_URL="$(snapctl get gitlab.url)"
 GITLAB_TOKEN="$(snapctl get gitlab.token)"
 
+
 configure() {
+    configure_debug
     configure_gitlab
+}
+
+configure_debug() {
+    [ -z "$DEBUG" ] || [ "$DEBUG" = true ] || [ "$DEBUG" = false ] && return 0
+    echo "debug should be set to false or true" | error
 }
 
 configure_gitlab() {

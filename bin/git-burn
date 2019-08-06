@@ -7,6 +7,7 @@ SHARE_DIR="$(cd "$(dirname "$0")/../share/git-burn" && pwd)"
 
 : "${GITLAB_URL:="$(snapctl get gitlab.url 2>/dev/null)"}"
 : "${GITLAB_TOKEN:="$(snapctl get gitlab.token 2>/dev/null)"}"
+: "${DEBUG:="$(snapctl get debug 2>/dev/null)"}"
 
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
@@ -71,6 +72,16 @@ hook() {
     [[ "$old_rev" =~ ^0+$ ]] && revs="$new_rev"
 
     fetch-mails
+
+    if [ "$DEBUG" = true ]; then
+        cat <<EOF
+Repository: $(pwd)
+
+Allowed emails:
+$EMAILS
+
+EOF
+    fi
 
     local status=0
     for commit in $(git rev-list "$revs" --not --branches --tags); do
