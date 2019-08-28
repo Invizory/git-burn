@@ -9,8 +9,8 @@ else
 	       --tty \
 	       --volume "$(CURDIR)":/build \
 	       --workdir /build \
-	       --entrypoint snapcraft \
-	       snapcore/snapcraft:stable
+	       snapcore/snapcraft:stable \
+	       sh -c 'apt update; exec snapcraft'
 endif
 
 .PHONY: lint
