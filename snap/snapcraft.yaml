@@ -12,9 +12,15 @@ confinement: classic
 
 apps:
   git-burn:
-    command: git-burn
+    command: locales-launch git-burn
 
 parts:
+  locales-launch:
+    plugin: nil
+    stage-snaps:
+      - locales-launch
+    stage-packages:
+      - locales-all
   dependencies:
     plugin: python
     python-packages:

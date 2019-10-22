@@ -9,9 +9,6 @@ SHARE_DIR="$(cd "$(dirname "$0")/../share/git-burn" && pwd)"
 : "${GITLAB_TOKEN:="$(snapctl get gitlab.token 2>/dev/null)"}"
 : "${DEBUG:="$(snapctl get debug 2>/dev/null)"}"
 
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
-
 usage() {
     cat <<EOF
 Git Burn is a server-side hook for linting commits.
