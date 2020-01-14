@@ -19,10 +19,12 @@ Git Burn is a server-side hook for linting commits.
 Usage:
   $PROGRAM_NAME REF OLD NEW
   $PROGRAM_NAME -s|--stdin
+  $PROGRAM_NAME --rev-list=<...>
   $PROGRAM_NAME -h|--help
 
 Options:
   -s, --stdin  Lint message from standard input.
+  --rev-list   Pass the specified argument as 'git rev-list' arguments.
 
 Environment:
   GITLAB_URL
@@ -34,7 +36,7 @@ main() {
     eval set -- "$(\
         getopt \
                --name "$PROGRAM_NAME" \
-               --longoptions help,stdin \
+               --longoptions help,stdin,rev-list: \
                --options h,s \
                -- \
                "$@"
@@ -48,6 +50,11 @@ main() {
                 ;;
             -s|--stdin)
                 cat | lint-message
+                exit
+                ;;
+            --rev-list)
+                shift
+                rev-list "$1"
                 exit
                 ;;
             "--")
@@ -71,6 +78,21 @@ hook() {
     local revs="$old_rev..$new_rev"
     [[ "$old_rev" =~ ^0+$ ]] && revs="$new_rev"
 
+    mapfile -t revisions < <(git rev-list "$revs" --not --branches --tags)
+
+    lint-commit-list "${revisions[@]}"
+}
+
+rev-list() {
+    mapfile -t revlist_args <<< "$1"
+    mapfile -t revisions < <(git rev-list "${revlist_args[@]}")
+
+    lint-commit-list "${revisions[@]}"
+}
+
+lint-commit-list() {
+    local commits=("$@")
+
     fetch-mails
 
     if [ "$DEBUG" = true ]; then
@@ -84,7 +106,9 @@ EOF
     fi
 
     local status=0
-    for commit in $(git rev-list "$revs" --not --branches --tags); do
+    for commit in "${commits[@]}"; do
+        [[ "$DEBUG" = true ]] && echo "Checking commit $commit..." >&2
+
         is-wiki "$commit" && continue
 
         result="$(lint "$commit" 2>&1 || true)"
