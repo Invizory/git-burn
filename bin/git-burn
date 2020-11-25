@@ -167,6 +167,7 @@ fetch-mails() {
 }
 
 fetch-mails-from-gitlab() {
+    EMAILS=""
     [ -z "$GITLAB_URL" ] || [ -z "$GITLAB_TOKEN" ] && return 0
     EMAILS=$(curl --silent --show-error \
                   --header "Private-Token: $GITLAB_TOKEN" \
