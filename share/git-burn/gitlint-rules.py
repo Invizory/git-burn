@@ -8,6 +8,8 @@ from gitlint.rules import (
     RuleViolation,
 )
 
+REF_RE = r"([A-Z][a-zA-Z-]*-|#|!)\d+"
+
 
 class TitleCapitalized(LineRule):
     name = "title-capitalized"
@@ -47,7 +49,7 @@ class TitleNoIssueReferences(LineRule):
 use last body paragraph"
 
     def validate(self, line, _commit):
-        if re.search(r"#\d+", line):
+        if re.search(REF_RE, line):
             return [RuleViolation(self.id, self.violation_message, line)]
 
 
@@ -60,7 +62,7 @@ in separate paragraph"
     def validate(self, commit):
         paragraphs = "\n".join(commit.message.body[1:]).split("\n\n")
         for para in paragraphs:
-            if re.search(r".+(See|Fixes|Closes) #\d+", para, re.I | re.S):
+            if re.search(r".+(See|Fixes|Closes) " + REF_RE, para, re.I | re.S):
                 return [RuleViolation(self.id, self.violation_message)]
 
 
@@ -72,6 +74,6 @@ class MergeContainReference(CommitRule):
     def validate(self, commit):
         if not commit.is_merge_commit:
             return
-        if re.search(r"(See|Fixes|Closes) #\d+", commit.message.full):
+        if re.search(r"(See|Fixes|Closes) " + REF_RE, commit.message.full):
             return
         return [RuleViolation(self.id, self.violation_message)]
