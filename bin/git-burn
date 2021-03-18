@@ -169,7 +169,7 @@ fetch-mails() {
 fetch-mails-from-gitlab() {
     EMAILS=""
     [ -z "$GITLAB_URL" ] || [ -z "$GITLAB_TOKEN" ] && return 0
-    EMAILS=$(curl --silent --show-error \
+    EMAILS=$(curl --silent --show-error --fail \
                   --header "Private-Token: $GITLAB_TOKEN" \
                   "$GITLAB_URL/api/v4/users/?active=true&per_page=1000" \
              | jq -r '.[].email' \
