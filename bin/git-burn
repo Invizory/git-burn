@@ -118,7 +118,7 @@ EOF
             echo "Git Burn rejected your commits."; echo
         fi
 
-        git log -1 "$commit"; echo
+        git log -1 --format=fuller "$commit"; echo
         echo "$result"; echo
         status=1
     done
